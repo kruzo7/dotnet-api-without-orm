@@ -1,6 +1,4 @@
-todo.txt
-dane.png
-readme.txt
+drafts/*
 
 .vscode/*
 !.vscode/settings.json
