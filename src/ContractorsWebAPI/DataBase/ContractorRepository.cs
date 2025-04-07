@@ -13,7 +13,7 @@ public class ContractorRepository : IContractorRepository
         _connectionString = connection.ConnectionString;
     }
 
-    public IEnumerable<Contractor> Search(string contractorName, decimal? contractorNIP)
+    public IEnumerable<Contractor> Search(string? contractorName, decimal? contractorNIP)
     {
         var contractors = new List<Contractor>();
 
@@ -51,7 +51,35 @@ public class ContractorRepository : IContractorRepository
 
     public Contractor Get(int contractorId)
     {
-        return new Contractor();
+        var contractor = new Contractor();
+
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            using (var command = new SqlCommand("[dbo].[StoredProcedure.Contractor.Get]", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@ContractorId", contractorId));
+
+                connection.Open();
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        contractor = new Contractor
+                        {
+                            ContractorId = reader.GetFieldValue<int>("ContractorId"),
+                            ContractorName = reader.GetFieldValue<string>("ContractorName"),
+                            ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
+                            ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
+                            ContractorAddresses = DeSerializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                        };
+                    }
+                }
+            }
+        }
+
+        return contractor;
     }
     public void Add(Contractor contractor)
     {

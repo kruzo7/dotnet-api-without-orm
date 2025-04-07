@@ -18,7 +18,7 @@ public class ContractorController : ControllerBase
     }  
 
     [HttpGet("search")]
-    public IEnumerable<Contractor> Search(string contractorName, decimal? contractorNIP)
+    public IEnumerable<Contractor> Search(string? contractorName, decimal? contractorNIP)
     {
         return _contractorRepository.Search(contractorName, contractorNIP);
     }

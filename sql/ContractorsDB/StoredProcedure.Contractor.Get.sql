@@ -12,7 +12,7 @@ SELECT TOP 1
     ContractorAddressLine
   FROM ContractorsAddresses
   WHERE ContractorId = c.ContractorId
-  FOR XML AUTO)
+  FOR XML PATH ('ContractorAddress'), root ('ContractorsAddresses')) AS ContractorAddresses
 FROM Contractors c
 WHERE [c].[ContractorId] = @ContractorId
 
