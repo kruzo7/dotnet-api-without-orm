@@ -5,7 +5,7 @@ namespace ContractorsWebAPI.DTOs;
 public class ContractorAddress
 {
     public int ContractorAddressId { get; set;}
-    public int ContractorID { get; set;}
+    public int ContractorId { get; set;}
     
     [Required]
     [MaxLength(1024)]

@@ -7,7 +7,7 @@ VALUES
     ('Kwiatkowski', 3456789012, 34567890123456);
 
 INSERT INTO  ContractorsAddresses
-    (ContractorID, ContractorAddressLine)
+    (ContractorId, ContractorAddressLine)
 VALUES
     (1, 'ul. Krakowska 12 02-123 Poznań'),
     (1, 'ul. Gdańska 45 02-123 Poznań'),

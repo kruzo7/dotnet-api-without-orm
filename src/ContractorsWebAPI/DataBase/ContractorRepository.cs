@@ -37,7 +37,7 @@ public class ContractorRepository : IContractorRepository
                             ContractorName = reader.GetFieldValue<string>("ContractorName"),
                             ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
                             ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
-                            ContractorAddresses = DeSerializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                            ContractorAddresses = DeserializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
                         };
 
                         contractors.Add(contractor);
@@ -72,7 +72,7 @@ public class ContractorRepository : IContractorRepository
                             ContractorName = reader.GetFieldValue<string>("ContractorName"),
                             ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
                             ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
-                            ContractorAddresses = DeSerializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                            ContractorAddresses = DeserializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
                         };
                     }
                 }
@@ -83,11 +83,40 @@ public class ContractorRepository : IContractorRepository
     }
     public void Add(Contractor contractor)
     {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            using (var command = new SqlCommand("[dbo].[StoredProcedure.Contractor.Add]", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@ContractorName", contractor.ContractorName));
+                command.Parameters.Add(new SqlParameter("@ContractorNIP", contractor.ContractorNIP));
+                command.Parameters.Add(new SqlParameter("@ContractorREGON", contractor.ContractorREGON));
+                command.Parameters.Add(new SqlParameter("@ContractorAddressesXML", SerializeContractorAddresses(contractor)));
 
+                connection.Open();
+
+                command.ExecuteNonQuery();
+            }
+        }
     }
     public void Edit(Contractor contractor)
     {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            using (var command = new SqlCommand("[dbo].[StoredProcedure.Contractor.Update]", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@ContractorId", contractor.ContractorId));
+                command.Parameters.Add(new SqlParameter("@ContractorName", contractor.ContractorName));
+                command.Parameters.Add(new SqlParameter("@ContractorNIP", contractor.ContractorNIP));
+                command.Parameters.Add(new SqlParameter("@ContractorREGON", contractor.ContractorREGON));
+                command.Parameters.Add(new SqlParameter("@ContractorAddressesXML", SerializeContractorAddresses(contractor)));
+                
+                connection.Open();
 
+                command.ExecuteNonQuery();
+            }
+        }
     }
     public void Delete(int contractorId)
     {
@@ -100,13 +129,13 @@ public class ContractorRepository : IContractorRepository
 
                 connection.Open();
 
-                command.ExecuteNonQuery();              
+                command.ExecuteNonQuery();
             }
         }
 
     }
 
-    private List<ContractorAddress> DeSerializeContractorAddresses(string xmlData)
+    private List<ContractorAddress> DeserializeContractorAddresses(string xmlData)
     {
         var contractorAddresses = new ContractorsAddresses();
         XmlSerializer serializer = new XmlSerializer(typeof(ContractorsAddresses));
@@ -117,5 +146,19 @@ public class ContractorRepository : IContractorRepository
         }
 
         return contractorAddresses.ContractorsAddressess;
+    }
+
+    private string SerializeContractorAddresses(Contractor contractor)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(ContractorsAddresses));
+
+        using (var stringWriter = new StringWriter())
+        {
+            using (var xmlWriter = new System.Xml.XmlTextWriter(stringWriter) { Formatting = System.Xml.Formatting.Indented })
+            {
+                serializer.Serialize(xmlWriter, new ContractorsAddresses() { ContractorsAddressess = contractor.ContractorAddresses });
+                return stringWriter.ToString();
+            }
+        }
     }
 }
