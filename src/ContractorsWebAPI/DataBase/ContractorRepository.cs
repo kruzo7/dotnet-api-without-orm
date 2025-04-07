@@ -91,6 +91,18 @@ public class ContractorRepository : IContractorRepository
     }
     public void Delete(int contractorId)
     {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            using (var command = new SqlCommand("[dbo].[StoredProcedure.Contractor.Delete]", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@ContractorId", contractorId));
+
+                connection.Open();
+
+                command.ExecuteNonQuery();              
+            }
+        }
 
     }
 
