@@ -1,3 +1,5 @@
+using System.Data;
+using System.Xml.Serialization;
 using ContractorsWebAPI.DTOs;
 using Microsoft.Data.SqlClient;
 
@@ -10,14 +12,41 @@ public class ContractorRepository : IContractorRepository
     {
         _connectionString = connection.ConnectionString;
     }
-    public IEnumerable<Contractor> GetAll()
-    {
-        return new List<Contractor>();
-    }
 
-    public IEnumerable<Contractor> Search(string contractorName, int? contractorNIP)
+    public IEnumerable<Contractor> Search(string contractorName, decimal? contractorNIP)
     {
-        return new List<Contractor>();
+        var contractors = new List<Contractor>();
+
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            using (var command = new SqlCommand("[dbo].[StoredProcedure.Contractor.Search]", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@ContractorName", contractorName));
+                command.Parameters.Add(new SqlParameter("@ContractorNIP", contractorNIP));
+
+                connection.Open();
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var contractor = new Contractor
+                        {
+                            ContractorId = reader.GetFieldValue<int>("ContractorId"),
+                            ContractorName = reader.GetFieldValue<string>("ContractorName"),
+                            ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
+                            ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
+                            ContractorAddresses = DeSerializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                        };
+
+                        contractors.Add(contractor);
+                    }
+                }
+            }
+        }
+
+        return contractors;
     }
 
     public Contractor Get(int contractorId)
@@ -35,5 +64,18 @@ public class ContractorRepository : IContractorRepository
     public void Delete(int contractorId)
     {
 
+    }
+
+    private List<ContractorAddress> DeSerializeContractorAddresses(string xmlData)
+    {
+        var contractorAddresses = new ContractorsAddresses();
+        XmlSerializer serializer = new XmlSerializer(typeof(ContractorsAddresses));
+
+        using (StringReader reader = new StringReader(xmlData))
+        {
+            contractorAddresses = (ContractorsAddresses)serializer.Deserialize(reader);
+        }
+
+        return contractorAddresses.ContractorsAddressess;
     }
 }

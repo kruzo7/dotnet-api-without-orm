@@ -9,7 +9,7 @@ public class Contractor
     [Required]
     [MaxLength(1024)]
     public string ContractorName { get; set; } = string.Empty;
-    public int ContractorNIP { get; set; }
-    public int ContractorREGON { get; set; }
+    public decimal ContractorNIP { get; set; }
+    public decimal ContractorREGON { get; set; }
     public List<ContractorAddress> ContractorAddresses { get; set; } = new List<ContractorAddress>();
 }

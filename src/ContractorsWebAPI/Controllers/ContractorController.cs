@@ -15,18 +15,12 @@ public class ContractorController : ControllerBase
     {
         _logger = logger;
         _contractorRepository = contractorRepository;
-    }
-
-    [HttpGet]
-    public IEnumerable<Contractor> GetAll()
-    {
-        return _contractorRepository.GetAll();
-    }
+    }  
 
     [HttpGet("search")]
-    public IEnumerable<Contractor> Search(string contractorName, int? contractorNIP)
+    public IEnumerable<Contractor> Search(string contractorName, decimal? contractorNIP)
     {
-        return _contractorRepository.GetAll();
+        return _contractorRepository.Search(contractorName, contractorNIP);
     }
 
     [HttpGet("{id}")]
