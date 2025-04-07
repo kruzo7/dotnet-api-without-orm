@@ -10,10 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IContractorDBConnection, ContractorDBConnection>(x =>
- new ContractorDBConnection(
-    Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.Process) 
-    ?? throw new NullReferenceException("ConnectionStrings:DefaultConnection")
-    ));
+  new ContractorDBConnection(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+
 builder.Services.AddScoped<IContractorRepository, ContractorRepository>();
 
 var app = builder.Build();
@@ -31,4 +29,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContractorsWebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]/[action]")]
+[Route("api/v0.1/[controller]")]
 public class ContractorController : ControllerBase
 {
     private readonly ILogger<ContractorController> _logger;
@@ -19,6 +19,12 @@ public class ContractorController : ControllerBase
 
     [HttpGet]
     public IEnumerable<Contractor> GetAll()
+    {
+        return _contractorRepository.GetAll();
+    }
+
+    [HttpGet("search")]
+    public IEnumerable<Contractor> Search(string contractorName, int? contractorNIP)
     {
         return _contractorRepository.GetAll();
     }

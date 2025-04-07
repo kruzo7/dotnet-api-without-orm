@@ -1,10 +1,13 @@
-using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ContractorsWebAPI.DTOs;
 
 public class Contractor
 {
     public int ContractorId { get; set; }
+    
+    [Required]
+    [MaxLength(1024)]
     public string ContractorName { get; set; } = string.Empty;
     public int ContractorNIP { get; set; }
     public int ContractorREGON { get; set; }
