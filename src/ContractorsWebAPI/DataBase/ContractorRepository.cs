@@ -37,7 +37,7 @@ public class ContractorRepository : IContractorRepository
                             ContractorName = reader.GetFieldValue<string>("ContractorName"),
                             ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
                             ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
-                            ContractorAddresses = DeserializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                            ContractorAddresses = DeserializeContractorAddresses(GetValue<string?>(reader, "ContractorAddresses"))
                         };
 
                         contractors.Add(contractor);
@@ -72,7 +72,7 @@ public class ContractorRepository : IContractorRepository
                             ContractorName = reader.GetFieldValue<string>("ContractorName"),
                             ContractorNIP = reader.GetFieldValue<decimal>("ContractorNIP"),
                             ContractorREGON = reader.GetFieldValue<decimal>("ContractorREGON"),
-                            ContractorAddresses = DeserializeContractorAddresses(reader.GetFieldValue<string>("ContractorAddresses"))
+                            ContractorAddresses = DeserializeContractorAddresses(GetValue<string?>(reader, "ContractorAddresses"))
                         };
                     }
                 }
@@ -111,7 +111,7 @@ public class ContractorRepository : IContractorRepository
                 command.Parameters.Add(new SqlParameter("@ContractorNIP", contractor.ContractorNIP));
                 command.Parameters.Add(new SqlParameter("@ContractorREGON", contractor.ContractorREGON));
                 command.Parameters.Add(new SqlParameter("@ContractorAddressesXML", SerializeContractorAddresses(contractor)));
-                
+
                 connection.Open();
 
                 command.ExecuteNonQuery();
@@ -135,8 +135,13 @@ public class ContractorRepository : IContractorRepository
 
     }
 
-    private List<ContractorAddress> DeserializeContractorAddresses(string xmlData)
+    private List<ContractorAddress> DeserializeContractorAddresses(string? xmlData)
     {
+        if (xmlData == null)
+        {
+            return new List<ContractorAddress>();
+        }
+
         var contractorAddresses = new ContractorsAddresses();
         XmlSerializer serializer = new XmlSerializer(typeof(ContractorsAddresses));
 
@@ -160,5 +165,12 @@ public class ContractorRepository : IContractorRepository
                 return stringWriter.ToString();
             }
         }
+    }
+
+    private T GetValue<T>(SqlDataReader reader, string columnName)
+    {
+        if (reader.IsDBNull(columnName))
+            return default;
+        return reader.GetFieldValue<T>(columnName);
     }
 }
